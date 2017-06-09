@@ -1,0 +1,18 @@
+-nbproject
+-npm-debug.log
+-node_modules
+-.sass-cache
+**/.DS_Store
+# Ignore Emacs autosaves of older versions
+**/*~
+# Ignore Emacs auto rescue files
+**/#*#
+**/.#*
+# Ignore pyc files
+*.pyc
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+# Ignore migrations files
+ebdjango/migrations/*
