@@ -70,8 +70,59 @@ The output will look like this:
   </body>
 </html>
 ```
-## Notes
 
+## Options
+
+#### verbose
+Type: `Boolean`
+
+If `true`, log verbose while running.
+
+
+#### files
+Type: `Array`
+
+Define entries that will be used to create the HTML snippets
+
+#### files.name
+Type: `String`
+
+Name of the file entry. This name will be used to match a comment line in the source HTML file. This comment line will be replaced with an HTML snippet. The comment line has the format of: `<!-- cdnfailover:FILES.NAME -->`. For example, if `name='bootstrap.min.js'`, then the comment line should be `<!-- cdnfailover:bootstrap.min.js -->`
+
+#### files.cdn
+Type: `String`
+
+CDN location of the source.
+
+#### files.cdncrossorigin
+Type: `String`
+
+crossOrigin attribute of CDN location of the source.
+
+#### files.cdnintegrity
+Type: `String`
+
+integrity attribute CDN location of the source.
+
+#### files.local
+Type: `String`
+
+Local location of the source.
+
+Example:
+``` javascript
+{
+  verbose: true,
+  files: [{ name: 'jquery-slim-min-js',
+            local: 'js/jquery/dist/jquery.slim.min.js',
+            cdn: 'https://code.jquery.com/jquery-3.2.1.slim.min.js',
+            cdnintegrity: 'sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN',
+            cdncrossorigin: 'anonymous'}
+          ]
+}
+```
+
+## Notes
 
 We use the following algorithm to detect whether JS or CSS has been successfully downloaded by the browser.
 
@@ -84,7 +135,7 @@ We use the following algorithm to detect whether JS or CSS has been successfully
          cssRules), then we insert a new link element with the local source under
          document.head.
 
-*WARNING: If your CDN CSS source has ONLY at-rules (eg. @viewport), then our CSS algorithm will always fail to detect that CDN source has successfully downloaded. CSS at-rules are not parsed into styleSheet objects by browsers.
+* WARNING: If your CDN CSS source has ONLY at-rules (eg. @viewport), then our CSS algorithm will always fail to detect that CDN source has successfully downloaded. CSS at-rules are not parsed into styleSheet objects by browsers.
 
 
 ## License
