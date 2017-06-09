@@ -19,11 +19,13 @@
     "url": "git://github.com/uppercasebrands/gulp-cdnfailover"
   },
   "scripts": {},
-  "devDependencies": {
+  "dependencies": {
     "applause": "^1.2.2",
     "gulp-util": "^3.0.8",
-    "jslint": "^0.10.3",
     "through2": "^2.0.3"
+  },
+  "devDependencies": {
+    "jslint": "^0.10.3"
   },
   "engines": {},
   "license": "MIT"
