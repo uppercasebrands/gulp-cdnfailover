@@ -64,8 +64,8 @@ function buildJSOutput(elem, i) {
   }
   output += 'onerror="(typeof cdnfailover===\'undefined\')' +
     '?cdnfailover={_' + i + ':true}:cdnfailover._' + i + '=true">';
-  output += '</script><script>(typeof cdnfailover!== \'undefined\')&&cdnfailover.hasOwnProperty(_' + i +
-    ')&&document.write(\'<script src="' + local + '"><\\/script>\');</script>';
+  output += '</script><script>(typeof cdnfailover!== \'undefined\')&&cdnfailover.hasOwnProperty(\'_' + i +
+    '\')&&document.write(\'<script src="' + local + '"><\\/script>\');</script>';
   return output;
 }
 
