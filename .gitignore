@@ -1,6 +1,6 @@
 -nbproject
 -npm-debug.log
--node_modules
+node_modules/*
 -.sass-cache
 **/.DS_Store
 # Ignore Emacs autosaves of older versions
