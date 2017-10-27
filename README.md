@@ -23,6 +23,7 @@ var cdnfailover = require("gulp-cdnfailover");
 gulp.src("./src/index.html")
  .pipe(cdnfailover({
       verbose: true,
+      uselocalfilesonly: false,
       files: [{ name: 'jquery-slim-min-js',
                 local: 'js/jquery/dist/jquery.slim.min.js',
                 cdn: 'https://code.jquery.com/jquery-3.2.1.slim.min.js',
@@ -77,6 +78,11 @@ The output will look like this:
 Type: `Boolean`
 
 If `true`, log verbose while running.
+
+#### uselocalfilesonly
+Type: `Boolean`
+
+If `true`, we don't do any of these tricks in this extension. We simply output a <script> or <link> tag pointing to the local copy. This is useful when you are developing a webpage offline and you dont want your browser to wait for the css/js files while developing. Defaults to false. 
 
 
 #### files

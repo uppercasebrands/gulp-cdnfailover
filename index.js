@@ -26,8 +26,8 @@
 'use strict';
 
 var applause = require('applause'),
-  gutil = require('gulp-util'),
-  through2 = require('through2');
+    gutil = require('gulp-util'),
+    through2 = require('through2');
 
 /**
  * Builds javascript element from an entry object. The entry object
@@ -36,8 +36,9 @@ var applause = require('applause'),
  *
  * @param {entry} elem - entry object
  * @param {integer} i - the id to use in the cdnfailover variable.
+ * @param {boolean} uselocalfilesonly - if uselocalfilesonly, returns a simple entry that refers to the local file.
  * @return {string} html snippet which downloads the cdn javascript source
-*                   and fails over to the local link if there are any errors.
+ *                   and fails over to the local link if there are any errors.
  * @example
  * buildJSOutput({ name: 'bootstrap-min-js',
  *                local: 'js/bootstrap/dist/js/bootstrap.min.js',
@@ -51,10 +52,15 @@ var applause = require('applause'),
  *   </script><script>(typeof cdnfailover!== 'undefined')&&cdnfailover.hasOwnProperty(_1)&&document.write(
  *   '<script src="js/bootstrap/dist/js/bootstrap.min.js"><\/script>');</script>
  */
-function buildJSOutput(elem, i) {
+function buildJSOutput(elem, i, uselocalfilesonly) {
   var cdn = elem.cdn || '',
-    local = elem.local || '',
-    output = '<script src="' + cdn + '" ';
+      local = elem.local || '';
+
+  if (uselocalfilesonly !== undefined && uselocalfilesonly) {
+    return '<script src="{0}" ></script>'.replace('{0}', local);;
+  }
+  
+  var output = '<script src="' + cdn + '" ';
 
   if (elem.cdnintegrity) {
     output += 'integrity="' + elem.cdnintegrity + '" ';
@@ -76,6 +82,7 @@ function buildJSOutput(elem, i) {
  * cdncrossorigin.
  *
  * @param {entry} elem - entry object
+ * @param {boolean} uselocalfilesonly - if uselocalfilesonly, returns a simple entry that refers to the local file.
  * @return {string} html snippet which downloads the cdn css source
  *                  and fails over to the local link if there are any errors.
  * @example
@@ -92,10 +99,17 @@ function buildJSOutput(elem, i) {
  *   !e.rules.length)))(function(){var e=document.createElement("link");e.rel="stylesheet",e.href="css/bootstrap/dist
  *   /css/bootstrap.min.css",document.head.appendChild(e)})();</script>​
  */
-function buildCSSOutput(elem) {
+function buildCSSOutput(elem, uselocalfilesonly) {
   var cdn = elem.cdn || '',
-    local = elem.local || '',
-    output = '<link rel="stylesheet" href="' + cdn + '" ';
+      local = elem.local || '';
+
+  // If we are not online, just return the link to the local copy.
+  if (uselocalfilesonly !== undefined && uselocalfilesonly) {
+    return '<link rel="stylesheet" href="{0}">'.replace('{0}', local);
+  }
+  
+  // We are online, so we send the 
+  var output = '<link rel="stylesheet" href="{0}" '.replace('{0}', cdn);
 
   if (elem.cdnintegrity) {
     output += 'integrity="' + elem.cdnintegrity + '" ';
@@ -112,16 +126,17 @@ function buildCSSOutput(elem) {
 // Exports the main function for gulp module
 module.exports = function (options) {
   var verbose  = options && options.verbose,
-    module_name = 'gulp-cdnfailover',  
-    loginfo = function () {
-      if (verbose) {
-        arguments[0] = module_name + ":" + arguments[0];
-        gutil.log.apply(this, arguments);
-      }
-    },
-    applauseOptions = { patterns: [],
-                        prefix: '<!-- cdnfailover:'},
-    names = [];
+      uselocalfilesonly = options && options.uselocalfilesonly,
+      module_name = 'gulp-cdnfailover',  
+      loginfo = function () {
+        if (verbose) {
+          arguments[0] = module_name + ":" + arguments[0];
+          gutil.log.apply(this, arguments);
+        }
+      },
+      applauseOptions = { patterns: [],
+                          prefix: '<!-- cdnfailover:'},
+      names = [];
   if (options && options.files) {
     for (var i = 0; i < options.files.length; i++) {
       var elem = options.files[i];
@@ -129,7 +144,7 @@ module.exports = function (options) {
         applauseOptions.patterns.push(
           {
             match: elem.name + ' -->',
-            replacement: elem.cdn.endsWith('css') ? buildCSSOutput(elem) : buildJSOutput(elem, i)
+            replacement: elem.cdn.endsWith('css') ? buildCSSOutput(elem, uselocalfilesonly) : buildJSOutput(elem, i, uselocalfilesonly)
           }
         );
         names.push(elem.name);
@@ -145,7 +160,7 @@ module.exports = function (options) {
       this.emit('error', new gutil.PluginError(module_name, 'Streaming not supported'));
     } else if (file.isBuffer()) {
       var contents = file.contents.toString(),
-        result = applause.create(applauseOptions).replace(contents);
+          result = applause.create(applauseOptions).replace(contents);
       if (result && result.content) {
         loginfo('successfully replaced %d patterns', result.count);
         file.contents = new Buffer(result.content);
