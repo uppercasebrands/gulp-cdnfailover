@@ -52,9 +52,13 @@ var applause = require('applause'),
  *   </script><script>(typeof cdnfailover!== 'undefined')&&cdnfailover.hasOwnProperty(_1)&&document.write(
  *   '<script src="js/bootstrap/dist/js/bootstrap.min.js"><\/script>');</script>
  */
-function buildJSOutput(elem, i, uselocalfilesonly) {
+function buildJSOutput(elem, i, uselocalfilesonly, localfilesroot) {
   var cdn = elem.cdn || '',
-      local = elem.local || '';
+      local = localfilesroot;
+  
+  if (elem.local) {
+    local = localfilesroot + elem.local;
+  }
 
   if (uselocalfilesonly !== undefined && uselocalfilesonly) {
     return '<script src="{0}" ></script>'.replace('{0}', local);;
@@ -82,6 +86,7 @@ function buildJSOutput(elem, i, uselocalfilesonly) {
  * cdncrossorigin.
  *
  * @param {entry} elem - entry object
+ * @param {string} localfilesroot - this root will be appended to all local files locations. useful if you are putting all local files under a directory. Defaults to empty string.
  * @param {boolean} uselocalfilesonly - if uselocalfilesonly, returns a simple entry that refers to the local file.
  * @return {string} html snippet which downloads the cdn css source
  *                  and fails over to the local link if there are any errors.
@@ -99,9 +104,13 @@ function buildJSOutput(elem, i, uselocalfilesonly) {
  *   !e.rules.length)))(function(){var e=document.createElement("link");e.rel="stylesheet",e.href="css/bootstrap/dist
  *   /css/bootstrap.min.css",document.head.appendChild(e)})();</script>​
  */
-function buildCSSOutput(elem, uselocalfilesonly) {
+function buildCSSOutput(elem, uselocalfilesonly, localfilesroot) {
   var cdn = elem.cdn || '',
-      local = elem.local || '';
+      local = localfilesroot;
+
+  if (elem.local) {
+    local = localfilesroot + elem.local;
+  }
 
   // If we are not online, just return the link to the local copy.
   if (uselocalfilesonly !== undefined && uselocalfilesonly) {
@@ -126,6 +135,7 @@ function buildCSSOutput(elem, uselocalfilesonly) {
 // Exports the main function for gulp module
 module.exports = function (options) {
   var verbose  = options && options.verbose,
+      localfilesroot = options && options.localfilesroot,
       uselocalfilesonly = options && options.uselocalfilesonly,
       module_name = 'gulp-cdnfailover',  
       loginfo = function () {
@@ -137,6 +147,10 @@ module.exports = function (options) {
       applauseOptions = { patterns: [],
                           prefix: '<!-- cdnfailover:'},
       names = [];
+  if (!localfilesroot) {
+    localfilesroot = ''
+  }
+  
   if (options && options.files) {
     for (var i = 0; i < options.files.length; i++) {
       var elem = options.files[i];
@@ -144,7 +158,7 @@ module.exports = function (options) {
         applauseOptions.patterns.push(
           {
             match: elem.name + ' -->',
-            replacement: elem.cdn.endsWith('css') ? buildCSSOutput(elem, uselocalfilesonly) : buildJSOutput(elem, i, uselocalfilesonly)
+            replacement: elem.cdn.endsWith('css') ? buildCSSOutput(elem, uselocalfilesonly, localfilesroot) : buildJSOutput(elem, i, uselocalfilesonly, localfilesroot)
           }
         );
         names.push(elem.name);

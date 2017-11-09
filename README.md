@@ -23,6 +23,7 @@ var cdnfailover = require("gulp-cdnfailover");
 gulp.src("./src/index.html")
  .pipe(cdnfailover({
       verbose: true,
+      localfilesroot: 'resources/', // make sure it ends with a slash
       uselocalfilesonly: false,
       files: [{ name: 'jquery-slim-min-js',
                 local: 'js/jquery/dist/jquery.slim.min.js',
@@ -94,6 +95,11 @@ Define entries that will be used to create the HTML snippets
 Type: `String`
 
 Name of the file entry. This name will be used to match a comment line in the source HTML file. This comment line will be replaced with an HTML snippet. The comment line has the format of: `<!-- cdnfailover:FILES.NAME -->`. For example, if `name='bootstrap.min.js'`, then the comment line should be `<!-- cdnfailover:bootstrap.min.js -->`
+
+#### files.localfilesroot
+Type: `String`
+
+This root will be appended to all local files locations. Useful if you are putting all local files under a directory. Defaults to empty string.
 
 #### files.cdn
 Type: `String`
