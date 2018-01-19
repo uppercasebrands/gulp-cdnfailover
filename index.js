@@ -1,5 +1,5 @@
 /**
- * @copyright Copyright (c) 2017 All Rights Reserved.
+ * @copyright Copyright (c) 2017-2018 All Rights Reserved.
  * @author Uppercase Brands Engineering  <eng@uppercasebrands.com>
  *
  * gulp-cdnfailover
@@ -27,6 +27,7 @@
 
 var applause = require('applause'),
     gutil = require('gulp-util'),
+    path = require('path'),
     through2 = require('through2');
 
 /**
@@ -50,14 +51,14 @@ var applause = require('applause'),
  *   integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
  *   crossorigin="anonymous" onerror="(typeof cdnfailover==='undefined')?cdnfailover={_1:true}:cdnfailover._1=true">
  *   </script><script>(typeof cdnfailover!== 'undefined')&&cdnfailover.hasOwnProperty(_1)&&document.write(
- *   '<script src="js/bootstrap/dist/js/bootstrap.min.js"><\/script>');</script>
+ *   '<script src="LOCALFILESROOT/bootstrap.min.js"><\/script>');</script>
  */
 function buildJSOutput(elem, i, uselocalfilesonly, localfilesroot) {
   var cdn = elem.cdn || '',
       local = localfilesroot;
   
   if (elem.local) {
-    local = localfilesroot + elem.local;
+    local = path.join(localfilesroot, path.basename(elem.local));
   }
 
   if (uselocalfilesonly !== undefined && uselocalfilesonly) {
@@ -86,7 +87,8 @@ function buildJSOutput(elem, i, uselocalfilesonly, localfilesroot) {
  * cdncrossorigin.
  *
  * @param {entry} elem - entry object
- * @param {string} localfilesroot - this root will be appended to all local files locations. useful if you are putting all local files under a directory. Defaults to empty string.
+ * @param {string} localfilesroot - this root will be appended to all local files locations. 
+ * useful if you are putting all local files under a directory. Defaults to empty string.
  * @param {boolean} uselocalfilesonly - if uselocalfilesonly, returns a simple entry that refers to the local file.
  * @return {string} html snippet which downloads the cdn css source
  *                  and fails over to the local link if there are any errors.
@@ -101,15 +103,15 @@ function buildJSOutput(elem, i, uselocalfilesonly, localfilesroot) {
  *   integrity=​"sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/​K68vbdEjh4u" crossorigin=​"anonymous">
  *   <script>​var e=document.styleSheets[document.styleSheets.length-1];if(typeof e==="undefined"||e.href!=="https://
  *   maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"||((!e.cssRules||!e.cssRules.length)&&(!e.rules||
- *   !e.rules.length)))(function(){var e=document.createElement("link");e.rel="stylesheet",e.href="css/bootstrap/dist
- *   /css/bootstrap.min.css",document.head.appendChild(e)})();</script>​
+ *   !e.rules.length)))(function(){var e=document.createElement("link");e.rel="stylesheet",e.href="LOCALFILESROOT
+ *   /bootstrap.min.css",document.head.appendChild(e)})();</script>​
  */
 function buildCSSOutput(elem, uselocalfilesonly, localfilesroot) {
   var cdn = elem.cdn || '',
       local = localfilesroot;
 
   if (elem.local) {
-    local = localfilesroot + elem.local;
+    local = path.join(localfilesroot, path.basename(elem.local));
   }
 
   // If we are not online, just return the link to the local copy.
